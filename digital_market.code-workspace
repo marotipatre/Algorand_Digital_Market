@@ -6,6 +6,9 @@
     },
     {
       "path": "projects/digital_market"
+    },
+    {
+      "path": "projects/frontend"
     }
   ],
   "settings": {
