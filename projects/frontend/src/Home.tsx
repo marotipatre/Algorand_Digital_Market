@@ -1,23 +1,49 @@
 // src/components/Home.tsx
+import * as algokit from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet'
 import React, { useState } from 'react'
 import ConnectWallet from './components/ConnectWallet'
-import Transact from './components/Transact'
+import { DigitalMarketClient, DigitalMarketFactory } from './contracts/DigitalMarket'
+import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import MethodCall from './components/MethodCall'
+import * as methods from './methods'
+
 
 interface HomeProps {}
 
 const Home: React.FC<HomeProps> = () => {
+  algokit.Config.configure({ populateAppCallResources: true })
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
-  const [openDemoModal, setOpenDemoModal] = useState<boolean>(false)
-  const { activeAddress } = useWallet()
+  // Wallet connection state
+  const {activeAccount,activeAddress,signer } = useWallet()
+
+  const [appId, setAppId] = useState<bigint>(BigInt(0))
+
+  //assetId, unitaryPrice, quantity
+  const [assetId, setAssetId] = useState<bigint>(0n)
+  const [unitaryPrice, setUnitaryPrice] = useState<bigint>(0n)
+  const [quantity, setQuantity] = useState<bigint>(0n)
+
 
   const toggleWalletModal = () => {
     setOpenWalletModal(!openWalletModal)
   }
 
-  const toggleDemoModal = () => {
-    setOpenDemoModal(!openDemoModal)
-  }
+  const algodConfig = getAlgodConfigFromViteEnvironment()
+  const algorand = algokit.AlgorandClient.fromConfig({ algodConfig })
+  algorand.setDefaultSigner(signer)
+
+  const dmFactory = new DigitalMarketFactory({
+    algorand: algorand,
+    defaultSender: activeAccount?.address,
+    defaultSigner: signer,
+  })
+
+  const dmClient = new DigitalMarketClient({
+    appId: BigInt(appId),
+    algorand: algorand,
+    defaultSigner: signer,
+  })
 
   return (
     <div className="hero min-h-screen bg-teal-400">
@@ -31,29 +57,28 @@ const Home: React.FC<HomeProps> = () => {
           </p>
 
           <div className="grid">
-            <a
-              data-test-id="getting-started"
-              className="btn btn-primary m-2"
-              target="_blank"
-              href="https://github.com/algorandfoundation/algokit-cli"
-            >
-              Getting started
-            </a>
-
-            <div className="divider" />
             <button data-test-id="connect-wallet" className="btn m-2" onClick={toggleWalletModal}>
               Wallet Connection
             </button>
-
-            {activeAddress && (
-              <button data-test-id="transactions-demo" className="btn m-2" onClick={toggleDemoModal}>
-                Transactions Demo
-              </button>
-            )}
+            <div className="divider" />
+            <label className="label">App Id</label>
+            <input
+              type="number"
+              value={appId.toString()}
+              onChange={(e) => setAppId(BigInt(e.target.value))}
+              className="input input-bordered"
+            />
+            <div className="divider" />
+            {activeAddress && appId === BigInt(0) && (<div>
+              <MethodCall
+                methodFunction={methods.create(algorand,dmFactory,dmClient,assetId,unitaryPrice,activeAddress!, 10n,setAppId)}
+                text="Create Application"
+              />
+            </div>) }
+            <label className="label">Network</label>
           </div>
 
           <ConnectWallet openModal={openWalletModal} closeModal={toggleWalletModal} />
-          <Transact openModal={openDemoModal} setModalState={setOpenDemoModal} />
         </div>
       </div>
     </div>
