@@ -54,16 +54,19 @@ setAppId: (id: bigint) => void,
 
 //buy function to buy the asset
 
-export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string, quantity: bigint, unitaryPrice: bigint, setUnitsLeft: (units: bigint) => void) {
+export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string,assetID: bigint, quantity: bigint, unitaryPrice: bigint, signer: TransactionSigner,  setUnitsLeft: (units: bigint) => void) {
   return async () => {
       const buyerTxn = await algorand.createTransaction.payment({
         sender,
         receiver: appAddress,
-        amount: algokit.microAlgos(Number(quantity*unitaryPrice))
+        amount: algokit.microAlgos(Number(quantity*unitaryPrice)),
+        extraFee: algokit.microAlgos(1000),
       })
-
+      console.log(buyerTxn)
+      const result = await dmClient.send.buy({ args: [buyerTxn, quantity], sender: sender, assetReferences:[assetID] })
+      console.log(result)
       const state = await dmClient.appClient.getGlobalState()
-      const assetId = state.assetId.value as bigint;
+      const assetId = state.assetid.value as bigint;
       const info = await algorand.asset.getAccountInformation(appAddress, assetId)
       setUnitsLeft(info.balance)
 }
@@ -73,10 +76,10 @@ export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFa
 
 
 //deleting the app and withdrawing the profit
-export function deleteApp(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient,
-setAppId: (id: number) => void) {
+export function deleteApp(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient,assetID:bigint,sender: string,signer: TransactionSigner,
+setAppId: (id: bigint) => void) {
   return async () => {
-     await dmClient.send.delete.deleteApplication({args: []})
-      setAppId(0)
+     await dmClient.send.delete.deleteApplication({args: [],sender: sender,assetReferences:[assetID]})
+      setAppId(BigInt(0))
   }
 }
