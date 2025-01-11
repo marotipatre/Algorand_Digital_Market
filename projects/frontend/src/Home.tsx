@@ -12,7 +12,7 @@ import * as methods from './methods'
 interface HomeProps {}
 
 const Home: React.FC<HomeProps> = () => {
-  algokit.Config.configure({ populateAppCallResources: true })
+  // algokit.Config.configure({ populateAppCallResources: true })
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
   // Wallet connection state
   const {activeAccount,activeAddress,signer } = useWallet()
@@ -71,7 +71,7 @@ const Home: React.FC<HomeProps> = () => {
             <div className="divider" />
             {activeAddress && appId === BigInt(0) && (<div>
               <MethodCall
-                methodFunction={methods.create(algorand,dmFactory,dmClient,assetId,unitaryPrice,activeAddress!, 10n,setAppId)}
+                methodFunction={methods.create(algorand,dmFactory,dmClient,assetId,unitaryPrice,activeAddress!, 10n, signer,setAppId)}
                 text="Create Application"
               />
             </div>) }

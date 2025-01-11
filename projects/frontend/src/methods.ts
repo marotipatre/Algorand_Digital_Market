@@ -1,9 +1,10 @@
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { DigitalMarketClient, DigitalMarketFactory } from './contracts/DigitalMarket';
+import { TransactionSigner } from 'algosdk';
 
 
 //using appfactory client from client file
-export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint ,
+export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , signer: TransactionSigner,
 setAppId: (id: bigint) => void,
 ) {
   return async () => {
@@ -11,7 +12,7 @@ setAppId: (id: bigint) => void,
 
     if(assetId == 0n)
 {
-    const assetCreate = await algorand.send.assetCreate({
+    const assetCreate = await algorand.send.assetCreate({ 
       sender,
       total: quantity,
     })
@@ -20,9 +21,10 @@ setAppId: (id: bigint) => void,
 
     assetId = BigInt(assetCreate.confirmation.assetIndex!)
 }
-    const result = await dmFactory.send.create.createApplication({ args: [assetBeingSold, unitaryPrice] });
+    const result = await dmFactory.send.create.createApplication({ args: [assetId, unitaryPrice] , sender});
 
     
+    const newClient = new DigitalMarketClient({ appId: result.appClient.appId, algorand: algorand, defaultSigner: signer })
 
     const mbrpay = await algorand.createTransaction.payment({
       sender,
@@ -31,8 +33,9 @@ setAppId: (id: bigint) => void,
       extraFee: algokit.algos(0.001)
     })
 
+    console.log(assetId)
 
-    await dmClient.send.optInToAsset({ args: [mbrpay] })
+    await newClient.send.optInToAsset({ args: [mbrpay], sender: sender,assetReferences:[assetId] })
 
     await algorand.send.assetTransfer({
       sender,
