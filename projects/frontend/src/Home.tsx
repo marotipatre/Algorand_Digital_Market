@@ -156,7 +156,7 @@ const Home: React.FC<HomeProps> = () => {
             )}
 
             <div className="divider" />
-            {activeAddress && appId !== BigInt(0) && unitsleft > 0n && (
+            {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
               <div>
               <label className="label">Price Per Unit</label>
               <input type="text" className='input input-bordered' value={(unitaryPrice/BigInt(10e6)).toString()} readOnly />
