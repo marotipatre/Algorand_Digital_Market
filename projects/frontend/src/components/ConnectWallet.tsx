@@ -1,4 +1,4 @@
-import { Provider, useWallet } from '@txnlab/use-wallet'
+import { useWallet, Wallet } from '@txnlab/use-wallet-react'
 import Account from './Account'
 
 interface ConnectWalletInterface {
@@ -7,9 +7,9 @@ interface ConnectWalletInterface {
 }
 
 const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
-  const { providers, activeAddress } = useWallet()
+  const { wallets, activeAddress } = useWallet()
 
-  const isKmd = (provider: Provider) => provider.metadata.name.toLowerCase() === 'kmd'
+  const isKmd = (provider: Wallet) => provider.metadata.name.toLowerCase() === 'kmd'
 
   return (
     <dialog id="connect_wallet_modal" className={`modal ${openModal ? 'modal-open' : ''}`}>
@@ -25,23 +25,23 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
           )}
 
           {!activeAddress &&
-            providers?.map((provider) => (
+            wallets?.map((wallet) => (
               <button
-                data-test-id={`${provider.metadata.id}-connect`}
+                data-test-id={`${wallet.metadata.name}-connect`}
                 className="btn border-teal-800 border-1  m-2"
-                key={`provider-${provider.metadata.id}`}
+                key={`provider-${wallet.metadata.name}`}
                 onClick={() => {
-                  return provider.connect()
+                  return wallet.connect()
                 }}
               >
-                {!isKmd(provider) && (
+                {!isKmd(wallet) && (
                   <img
-                    alt={`wallet_icon_${provider.metadata.id}`}
-                    src={provider.metadata.icon}
+                    alt={`wallet_icon_${wallet.metadata.name}`}
+                    src={wallet.metadata.icon}
                     style={{ objectFit: 'contain', width: '30px', height: 'auto' }}
                   />
                 )}
-                <span>{isKmd(provider) ? 'LocalNet Wallet' : provider.metadata.name}</span>
+                <span>{isKmd(wallet) ? 'LocalNet Wallet' : wallet.metadata.name}</span>
               </button>
             ))}
         </div>
@@ -61,8 +61,8 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
               className="btn btn-warning"
               data-test-id="logout"
               onClick={() => {
-                if (providers) {
-                  const activeProvider = providers.find((p) => p.isActive)
+                if (wallets) {
+                  const activeProvider = wallets.find((p) => p.isActive)
                   if (activeProvider) {
                     activeProvider.disconnect()
                   } else {

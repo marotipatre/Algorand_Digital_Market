@@ -1,6 +1,6 @@
 // src/components/Home.tsx
 import * as algokit from '@algorandfoundation/algokit-utils'
-import { useWallet } from '@txnlab/use-wallet'
+import { useWallet } from '@txnlab/use-wallet-react'
 import React, { useState } from 'react'
 import ConnectWallet from './components/ConnectWallet'
 import { DigitalMarketClient, DigitalMarketFactory } from './contracts/DigitalMarket'
@@ -12,11 +12,8 @@ import * as methods from './methods'
 interface HomeProps {}
 
 const Home: React.FC<HomeProps> = () => {
-  algokit.Config.configure({ populateAppCallResources: true })
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
-  // Wallet connection state
-  const {activeAccount,activeAddress,signer } = useWallet()
-
+  const {activeAccount,activeAddress,transactionSigner } = useWallet()
   const [appId, setAppId] = useState<bigint>(BigInt(0))
 
   //assetId, unitaryPrice, quantity
@@ -31,18 +28,18 @@ const Home: React.FC<HomeProps> = () => {
 
   const algodConfig = getAlgodConfigFromViteEnvironment()
   const algorand = algokit.AlgorandClient.fromConfig({ algodConfig })
-  algorand.setDefaultSigner(signer)
+  algorand.setDefaultSigner(transactionSigner)
 
   const dmFactory = new DigitalMarketFactory({
     algorand: algorand,
     defaultSender: activeAccount?.address,
-    defaultSigner: signer,
+    defaultSigner: transactionSigner,
   })
 
   const dmClient = new DigitalMarketClient({
     appId: BigInt(appId),
     algorand: algorand,
-    defaultSigner: signer,
+    defaultSigner: transactionSigner,
   })
 
   return (
@@ -71,7 +68,7 @@ const Home: React.FC<HomeProps> = () => {
             <div className="divider" />
             {activeAddress && appId === BigInt(0) && (<div>
               <MethodCall
-                methodFunction={methods.create(algorand,dmFactory,dmClient,assetId,unitaryPrice,activeAddress!, 10n,setAppId)}
+                methodFunction={methods.create(algorand,dmFactory,dmClient,assetId,unitaryPrice,activeAddress!, 10n,setAppId,transactionSigner)}
                 text="Create Application"
               />
             </div>) }
