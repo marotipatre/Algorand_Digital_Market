@@ -7,12 +7,14 @@ import { TransactionSigner } from 'algosdk';
 export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , signer: TransactionSigner,
 setAppId: (id: bigint) => void,
 ) {
+
+  console.log(unitaryPrice)
   return async () => {
     let assetId = assetBeingSold
 
     if(assetId == 0n)
 {
-    const assetCreate = await algorand.send.assetCreate({ 
+    const assetCreate = await algorand.send.assetCreate({
       sender,
       total: quantity,
     })
@@ -23,7 +25,7 @@ setAppId: (id: bigint) => void,
 }
     const result = await dmFactory.send.create.createApplication({ args: [assetId, unitaryPrice] , sender});
 
-    
+
     const newClient = new DigitalMarketClient({ appId: result.appClient.appId, algorand: algorand, defaultSigner: signer })
 
     const mbrpay = await algorand.createTransaction.payment({
@@ -56,6 +58,8 @@ setAppId: (id: bigint) => void,
 
 export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string,assetID: bigint, quantity: bigint, unitaryPrice: bigint, signer: TransactionSigner,  setUnitsLeft: (units: bigint) => void) {
   return async () => {
+      console.log(quantity)
+      console.log(unitaryPrice)
       const buyerTxn = await algorand.createTransaction.payment({
         sender,
         receiver: appAddress,
