@@ -48,6 +48,9 @@
     "react-dom": "^18.2.0",
     "tslib": "^2.6.2"
   },
+
+
+
   "scripts": {
     "generate:app-clients": "algokit project link --all",
     "dev": "vite",

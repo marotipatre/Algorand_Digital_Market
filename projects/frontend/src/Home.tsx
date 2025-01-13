@@ -22,6 +22,7 @@ const Home: React.FC<HomeProps> = () => {
   //assetId, unitaryPrice, quantity
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [unitaryPrice, setUnitaryPrice] = useState<bigint>(0n)
+  const [changeprice, setChangePrice] = useState<bigint>(0n)
   const [quantity, setQuantity] = useState<bigint>(0n)
   const [unitsleft, setUnitsLeft] = useState<bigint>(0n)
   const [seller, setSeller] = useState<string | undefined>(undefined)
@@ -59,8 +60,8 @@ const Home: React.FC<HomeProps> = () => {
       })
 
       console.log('state.assetid.value above')
-      setAssetId(BigInt(0))      
-      
+      setAssetId(BigInt(0))
+
 
       const state = await dmClient.appClient.getGlobalState()
 
@@ -68,9 +69,7 @@ const Home: React.FC<HomeProps> = () => {
 
       console.log('state.assetid.value ', state.assetid.value)
 
-      setAssetId((h)=>{
-        return BigInt(state.assetid.value)
-      })
+      setAssetId(BigInt(state.assetid.value))
 
       const info = await algorand.asset.getAccountInformation(algosdk.getApplicationAddress(appId), BigInt(state.assetid.value))
 
@@ -167,9 +166,11 @@ const Home: React.FC<HomeProps> = () => {
               </div>
             )}
 
-            <div className="divider" />
+
             {appId !== BigInt(0) && (
+
               <div>
+                <div className="divider" />
                 <label className="label">Asset ID</label>
                 <input type="text" className="input input-bordered" value={assetId.toString()} readOnly />
                 <label className="label">Units Left</label>
@@ -177,9 +178,23 @@ const Home: React.FC<HomeProps> = () => {
               </div>
             )}
 
-            <div className="divider" />
+            {appId!== BigInt(0) && activeAddress === seller && (
+              <div>
+                <div className="divider" />
+                <label className='label'>Change Asset Prize</label>
+                <input type="number" className='input input-bordered' value={(changeprice / BigInt(10e5)).toString()} onChange={(e) => setChangePrice(BigInt(e.currentTarget.valueAsNumber || 0) * BigInt(10e5))} />
+                <MethodCall
+                  text='Set Price'
+                  methodFunction={methods.setprice(algorand, dmFactory, dmClient, activeAddress!, changeprice, TransactionSigner,setUnitaryPrice)}/>
+
+              </div>
+
+              )}
+
+
             {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
               <div>
+                <div className="divider" />
                 <label className="label">Price Per Unit</label>
                 <input type="text" className="input input-bordered" value={(unitaryPrice / BigInt(10e5)).toString()} readOnly />
                 <label className="label">Desired Quantity</label>
@@ -211,6 +226,7 @@ const Home: React.FC<HomeProps> = () => {
 
             {appId !== BigInt(0) && unitsleft <= 0n && activeAddress !== seller && (
               <div>
+                <div className="divider" />
                 <p className="text-red-500">No units left</p>
               </div>
             )}

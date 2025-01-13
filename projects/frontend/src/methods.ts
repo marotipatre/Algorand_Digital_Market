@@ -53,6 +53,12 @@ setAppId: (id: bigint) => void,
 
 }
 
+export function setprice(algorand: algokit.AlgorandClient, dmFactory:DigitalMarketFactory, dmClient: DigitalMarketClient, sender: string, unitaryPrice: bigint, signer: TransactionSigner,setUnitaryPrice: (id : bigint) => void, ) {
+  return async () => {
+    await dmClient.send.setPrice({ args: [unitaryPrice], sender: sender, assetReferences:[] })
+    setUnitaryPrice(unitaryPrice);
+  }
+}
 
 //buy function to buy the asset
 
