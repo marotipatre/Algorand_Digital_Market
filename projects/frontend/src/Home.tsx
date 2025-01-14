@@ -12,20 +12,25 @@ import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClient
 interface HomeProps {}
 
 const Home: React.FC<HomeProps> = () => {
-  // algokit.Config.configure({ populateAppCallResources: true })
+
+  // algokit.Config.configure({ populateAppCallResources: true }) ***no need of this now
   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false)
+
   // Wallet connection state
   const { activeAccount, activeAddress, signer: TransactionSigner } = useWallet()
 
-  const [appId, setAppId] = useState<bigint>(BigInt(0))
 
   //assetId, unitaryPrice, quantity
+  const [appId, setAppId] = useState<bigint>(BigInt(0))
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [unitaryPrice, setUnitaryPrice] = useState<bigint>(0n)
   const [changeprice, setChangePrice] = useState<bigint>(0n)
   const [quantity, setQuantity] = useState<bigint>(0n)
   const [unitsleft, setUnitsLeft] = useState<bigint>(0n)
-  const [seller, setSeller] = useState<string | undefined>(undefined)
+  const [seller, setSeller] = useState<string >("")
+  const [assetname, setassetname] = useState<string>("")
+  const[int_quantity, setInt_quanity] = useState<bigint>(0n)
+  const [hasAsset, sethasAsset] = useState<boolean>(false);
 
   const toggleWalletModal = () => {
     setOpenWalletModal(!openWalletModal)
@@ -63,17 +68,20 @@ const Home: React.FC<HomeProps> = () => {
       setAssetId(BigInt(0))
 
 
+
+
       const state = await dmClient.appClient.getGlobalState()
 
       setUnitaryPrice(BigInt(state.unitaryprice.value))
 
       console.log('state.assetid.value ', state.assetid.value)
 
+
       setAssetId(BigInt(state.assetid.value))
 
       const info = await algorand.asset.getAccountInformation(algosdk.getApplicationAddress(appId), BigInt(state.assetid.value))
 
-      algorand.client.algod
+      await algorand.client.algod
         .getApplicationByID(Number(appId))
         .do()
         .then((app) => {
@@ -121,7 +129,7 @@ const Home: React.FC<HomeProps> = () => {
             Welcome to <div className="font-bold">AlgoKit 🙂</div>
           </h1>
           <p className="py-6">
-            This starter has been generated using official AlgoKit React template. Refer to the resource below for next steps.
+            Digital Market - Sell your asset at your fingertips
           </p>
 
           <div className="grid">
@@ -130,15 +138,51 @@ const Home: React.FC<HomeProps> = () => {
             </button>
             <div className="divider" />
             <label className="label">App Id</label>
+
             <input
               type="number"
               value={appId.toString()}
               onChange={(e) => setAppId(BigInt(e.target.value))}
               className="input input-bordered"
             />
+            <div>
+            <div className='divider'/>
+            <label className="label flex items-center">
+            <span className="ml-2">Do you have Asset?</span>
+            <input
+                type="checkbox"
+                className="checkbox checkbox-primary"
+                onChange={(e)=>{
+                  sethasAsset(e.currentTarget.checked)
+                }}
+                  />
+            </label>
+            </div>
 
             <div className="divider" />
-            {activeAddress && appId === BigInt(0) && (
+            {hasAsset && activeAddress && appId === BigInt(0) && (
+                <div>
+                    <label className="label">Asset ID</label>
+                    <input
+                  type="number"
+                  className="input input-bordered"
+                  value={(assetId).toString()}
+                  onChange={(e) => {
+                    setAssetId(BigInt(e.currentTarget.valueAsNumber || 0))
+                  }}
+                />
+                <label className="label">Asset Quantity To be Sold</label>
+                <input
+                  type="number"
+                  className="input input-bordered"
+                  value={(int_quantity).toString()}
+                  onChange={(e) => {
+                    setInt_quanity(BigInt(e.currentTarget.valueAsNumber || 0))
+                  }}
+                />
+                </div>
+            )}
+            { !hasAsset && activeAddress && appId === BigInt(0) && (
               <div>
                 <label className="label">Unitary Price</label>
                 <input
@@ -149,6 +193,26 @@ const Home: React.FC<HomeProps> = () => {
                     setUnitaryPrice(BigInt(e.currentTarget.valueAsNumber || 0) * BigInt(10e5))
                   }}
                 />
+                <label className="label">Asset Name</label>
+                <input
+                type = "text"
+                className='input input-bordered'
+                value={assetname?.toString()}
+                onChange={(e) => {
+                  setassetname(e.currentTarget.value || "")
+                }} />
+                <label className="label">Asset Quantity</label>
+                <input
+                  type="number"
+                  className="input input-bordered"
+                  value={(int_quantity).toString()}
+                  onChange={(e) => {
+                    setInt_quanity(BigInt(e.currentTarget.valueAsNumber || 0))
+                  }}
+                />
+                </div>
+                )}
+                <div className=''>
                 <MethodCall
                   methodFunction={methods.create(
                     algorand,
@@ -157,14 +221,17 @@ const Home: React.FC<HomeProps> = () => {
                     assetId,
                     unitaryPrice,
                     activeAddress!,
-                    10n,
+                    int_quantity,
                     TransactionSigner,
+                    assetname,
+                    "https://res.cloudinary.com/dmebegin1/image/upload/v1733100913/PredictX_1_z05dcq.png",
                     setAppId,
                   )}
                   text="Create Application"
                 />
-              </div>
-            )}
+                </div>
+
+
 
 
             {appId !== BigInt(0) && (
@@ -173,12 +240,19 @@ const Home: React.FC<HomeProps> = () => {
                 <div className="divider" />
                 <label className="label">Asset ID</label>
                 <input type="text" className="input input-bordered" value={assetId.toString()} readOnly />
+                <label className="label">Asset Name</label>
+                <input
+                type = "text"
+                className='input input-bordered'
+                value={assetname?.toString()}
+                readOnly />
                 <label className="label">Units Left</label>
                 <input type="text" className="input input-bordered" value={unitsleft.toString()} readOnly />
+
               </div>
             )}
 
-            {appId!== BigInt(0) && activeAddress === seller && (
+            {appId!== BigInt(0) && activeAddress === seller && unitsleft > 0n && (
               <div>
                 <div className="divider" />
                 <label className='label'>Change Asset Prize</label>
@@ -218,6 +292,7 @@ const Home: React.FC<HomeProps> = () => {
                     quantity,
                     unitaryPrice,
                     TransactionSigner,
+                    seller,
                     setUnitsLeft,
                   )}
                 />
@@ -231,7 +306,7 @@ const Home: React.FC<HomeProps> = () => {
               </div>
             )}
 
-            {appId !== BigInt(0) && unitsleft <= 0n && activeAddress === seller && (
+            {appId !== BigInt(0) && activeAddress === seller && (
               <MethodCall
                 text="Delete App"
                 methodFunction={methods.deleteApp(algorand, dmFactory, dmClient, assetId, activeAddress!, TransactionSigner, setAppId)}

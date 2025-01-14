@@ -4,7 +4,7 @@ import { TransactionSigner } from 'algosdk';
 
 
 //using appfactory client from client file
-export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , signer: TransactionSigner,
+export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , signer: TransactionSigner,assetname: string, url: string,
 setAppId: (id: bigint) => void,
 ) {
 
@@ -17,12 +17,16 @@ setAppId: (id: bigint) => void,
     const assetCreate = await algorand.send.assetCreate({
       sender,
       total: quantity,
+      assetName: assetname,
+      url: url,
     })
 
     console.log(assetCreate)
 
     assetId = BigInt(assetCreate.confirmation.assetIndex!)
+
 }
+  
     const result = await dmFactory.send.create.createApplication({ args: [assetId, unitaryPrice] , sender});
 
 
@@ -62,7 +66,7 @@ export function setprice(algorand: algokit.AlgorandClient, dmFactory:DigitalMark
 
 //buy function to buy the asset
 
-export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string,assetID: bigint, quantity: bigint, unitaryPrice: bigint, signer: TransactionSigner,  setUnitsLeft: (units: bigint) => void) {
+export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string,assetID: bigint, quantity: bigint, unitaryPrice: bigint, signer: TransactionSigner, seller:string , setUnitsLeft: (units: bigint) => void) {
   return async () => {
       console.log(quantity)
       console.log(unitaryPrice)
@@ -73,6 +77,11 @@ export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFa
         extraFee: algokit.microAlgos(1000),
       })
       console.log(buyerTxn)
+
+      // Add a valid condition or remove the if statement if not needed
+      if (((await algorand.asset.getAccountInformation(sender,assetID)).balance <= 0) && sender !== seller)  {
+            await algorand.send.assetOptIn({sender: sender,assetId: assetID})
+        }
       const result = await dmClient.send.buy({ args: [buyerTxn, quantity], sender: sender, assetReferences:[assetID] })
       console.log(result)
       const state = await dmClient.appClient.getGlobalState()
