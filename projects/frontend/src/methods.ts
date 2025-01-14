@@ -79,9 +79,16 @@ export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFa
       console.log(buyerTxn)
 
       // Add a valid condition or remove the if statement if not needed
-      if ( sender !== seller)  {
-            await algorand.send.assetOptIn({sender: sender,assetId: assetID})
+      try {
+        const accountInfo = await algorand.asset.getAccountInformation(sender, assetID);
+        if (accountInfo.balance <= 0 && sender !== seller) {
+          await algorand.send.assetOptIn({ sender: sender, assetId: assetID });
         }
+      } catch (error) {
+        console.error('Error fetching account information or opting in:', error);
+        // Handle the error, e.g., continue without interruption
+      }
+      
       const result = await dmClient.send.buy({ args: [buyerTxn, quantity], sender: sender, assetReferences:[assetID] })
       console.log(result)
       const state = await dmClient.appClient.getGlobalState()
