@@ -26,7 +26,7 @@ setAppId: (id: bigint) => void,
     assetId = BigInt(assetCreate.confirmation.assetIndex!)
 
 }
-  
+
     const result = await dmFactory.send.create.createApplication({ args: [assetId, unitaryPrice] , sender});
 
 
@@ -79,7 +79,7 @@ export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFa
       console.log(buyerTxn)
 
       // Add a valid condition or remove the if statement if not needed
-      if (((await algorand.asset.getAccountInformation(sender,assetID)).balance <= 0) && sender !== seller)  {
+      if ( sender !== seller)  {
             await algorand.send.assetOptIn({sender: sender,assetId: assetID})
         }
       const result = await dmClient.send.buy({ args: [buyerTxn, quantity], sender: sender, assetReferences:[assetID] })
