@@ -145,7 +145,9 @@ const Home: React.FC<HomeProps> = () => {
               onChange={(e) => setAppId(BigInt(e.target.value))}
               className="input input-bordered"
             />
+             {appId === BigInt(0) && (
             <div>
+
             <div className='divider'/>
             <label className="label flex items-center">
             <span className="ml-2">Do you have Asset?</span>
@@ -158,6 +160,7 @@ const Home: React.FC<HomeProps> = () => {
                   />
             </label>
             </div>
+                )}
 
             <div className="divider" />
             {hasAsset && activeAddress && appId === BigInt(0) && (
@@ -212,6 +215,7 @@ const Home: React.FC<HomeProps> = () => {
                 />
                 </div>
                 )}
+                {appId === BigInt(0) && (
                 <div className=''>
                 <MethodCall
                   methodFunction={methods.create(
@@ -230,6 +234,7 @@ const Home: React.FC<HomeProps> = () => {
                   text="Create Application"
                 />
                 </div>
+                )}
 
 
 
