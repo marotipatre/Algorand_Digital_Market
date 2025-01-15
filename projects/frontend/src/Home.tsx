@@ -72,6 +72,7 @@ const Home: React.FC<HomeProps> = () => {
 
       const state = await dmClient.appClient.getGlobalState()
 
+
       setUnitaryPrice(BigInt(state.unitaryprice.value))
 
       console.log('state.assetid.value ', state.assetid.value)
@@ -81,6 +82,8 @@ const Home: React.FC<HomeProps> = () => {
 
       const info = await algorand.asset.getAccountInformation(algosdk.getApplicationAddress(appId), BigInt(state.assetid.value))
 
+      const asset_info = await algorand.asset.getById(BigInt(state.assetid.value))
+
       await algorand.client.algod
         .getApplicationByID(Number(appId))
         .do()
@@ -88,7 +91,10 @@ const Home: React.FC<HomeProps> = () => {
           setSeller(app.params.creator)
         })
 
+
       setUnitsLeft(info.balance)
+      setassetname(asset_info.assetName || "")
+
       // console.log(BigInt(state.unitaryprice.value))
       // console.log(BigInt(state.assetid.value))
       // console.log(info.balance)
@@ -304,7 +310,7 @@ const Home: React.FC<HomeProps> = () => {
               </div>
             )}
 
-            {appId !== BigInt(0) && unitsleft <= 0n && activeAddress !== seller && (
+            {appId !== BigInt(0) && assetId !== BigInt(0) && unitsleft <= 0n && activeAddress !== seller && (
               <div>
                 <div className="divider" />
                 <p className="text-red-500">No units left</p>

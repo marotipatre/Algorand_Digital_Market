@@ -24,6 +24,7 @@ setAppId: (id: bigint) => void,
     console.log(assetCreate)
 
     assetId = BigInt(assetCreate.confirmation.assetIndex!)
+   
 
 }
 
