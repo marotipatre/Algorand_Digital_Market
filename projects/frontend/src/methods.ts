@@ -18,13 +18,15 @@ setAppId: (id: bigint) => void,
       sender,
       total: quantity,
       assetName: assetname,
+      unitName: assetname.substring(0, 3),
       url: url,
+
     })
 
     console.log(assetCreate)
 
     assetId = BigInt(assetCreate.confirmation.assetIndex!)
-   
+
 
 }
 
