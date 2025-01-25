@@ -24,13 +24,6 @@ def deploy(
         indexer_client=indexer_client,
     )
 
-    app_client.deploy(
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-        on_update=algokit_utils.OnUpdate.AppendApp,
-    )
-    name = "world"
-    response = app_client.hello(name=name)
-    logger.info(
-        f"Called hello on {app_spec.contract.name} ({app_client.app_id}) "
-        f"with name={name}, received: {response.return_value}"
-    )
+    app_client.create_create_application(asset_id=0, unitary_price=3)
+
+    logger.info(app_client.app_id)
