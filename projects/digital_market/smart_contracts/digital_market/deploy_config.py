@@ -26,4 +26,4 @@ def deploy(
 
     app_client.create_create_application(asset_id=0, unitary_price=3)
 
-    logger.info(app_client.app_id)
+    logger.info(f"Application Deployed Successfully with APP ID : {app_client.app_id}")
