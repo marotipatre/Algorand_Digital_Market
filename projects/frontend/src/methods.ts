@@ -71,6 +71,18 @@ export function setprice(algorand: algokit.AlgorandClient, dmFactory:DigitalMark
 
 export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, sender: string, appAddress: string,assetID: bigint, quantity: bigint, unitaryPrice: bigint, signer: TransactionSigner, seller:string , setUnitsLeft: (units: bigint) => void) {
   return async () => {
+    try {
+      // Check if the user already has the asset in their wallet
+      const accountInfo = await algorand.asset.getAccountInformation(sender, assetID);
+      if (accountInfo && accountInfo.balance > 0n) {
+        alert('You already own this asset. You cannot purchase it again.');
+        return; // Exit the function if the user already owns the asset
+      }
+    } catch (error) {
+      // If the user doesn't have the asset, proceed with the purchase
+      console.log('User does not own the asset. Proceeding with purchase...');
+    }
+
       console.log(quantity)
       console.log(unitaryPrice)
       const buyerTxn = await algorand.createTransaction.payment({
@@ -96,6 +108,7 @@ export function buy(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFa
       const assetId = state.assetid.value as bigint;
       const info = await algorand.asset.getAccountInformation(appAddress, assetId)
       setUnitsLeft(info.balance)
+      alert('Purchase successful!');
 }
 
 

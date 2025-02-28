@@ -234,7 +234,7 @@ const Home: React.FC<HomeProps> = () => {
                     int_quantity,
                     TransactionSigner,
                     assetname,
-                    "https://res.cloudinary.com/dmebegin1/image/upload/v1733100913/PredictX_1_z05dcq.png",
+                    "https://res.cloudinary.com/dmebegin1/image/upload/v1740774947/algo_cap_uaavnd.png#arc69",
                     setAppId,
                   )}
                   text="Create Application"
@@ -277,38 +277,47 @@ const Home: React.FC<HomeProps> = () => {
               )}
 
 
-            {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
-              <div>
-                <div className="divider" />
-                <label className="label">Price Per Unit</label>
-                <input type="text" className="input input-bordered" value={(unitaryPrice / BigInt(10e5)).toString()} readOnly />
-                <label className="label">Desired Quantity</label>
-                <input
-                  type="number"
-                  className="input input-bordered"
-                  value={quantity.toString()}
-                  onChange={(e) => {
-                    setQuantity(BigInt(e.currentTarget.valueAsNumber || 0))
-                  }}
-                />
-                <MethodCall
-                  text={`Buy ${quantity} for ${(unitaryPrice * BigInt(quantity)) / BigInt(10e5)} AlGO`}
-                  methodFunction={methods.buy(
-                    algorand,
-                    dmFactory,
-                    dmClient,
-                    activeAddress!,
-                    algosdk.getApplicationAddress(appId),
-                    assetId,
-                    quantity,
-                    unitaryPrice,
-                    TransactionSigner,
-                    seller,
-                    setUnitsLeft,
-                  )}
-                />
-              </div>
-            )}
+              {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
+                <div>
+                  <div className="divider" />
+                  <label className="label">Price Per Unit</label>
+                  <input
+                    type="text"
+                    className="input input-bordered"
+                    value={(unitaryPrice / BigInt(10e5)).toString()}
+                    readOnly
+                  />
+                  <label className="label">Desired Quantity</label>
+                  <input
+                    type="number"
+                    className="input input-bordered"
+                    value={quantity.toString()}
+                    min="1"
+                    max="1"
+                    onChange={(e) => {
+                      const inputValue = e.currentTarget.valueAsNumber || 0;
+                      // Ensure the quantity is always 1
+                      setQuantity(inputValue > 1 ? BigInt(1) : BigInt(inputValue));
+                    }}
+                  />
+                  <MethodCall
+                    text={`Buy ${quantity} for ${(unitaryPrice * BigInt(quantity)) / BigInt(10e5)} AlGO`}
+                    methodFunction={methods.buy(
+                      algorand,
+                      dmFactory,
+                      dmClient,
+                      activeAddress!,
+                      algosdk.getApplicationAddress(appId),
+                      assetId,
+                      quantity,
+                      unitaryPrice,
+                      TransactionSigner,
+                      seller,
+                      setUnitsLeft,
+                    )}
+                  />
+                </div>
+              )}
 
             {appId !== BigInt(0) && assetId !== BigInt(0) && unitsleft <= 0n && activeAddress !== seller && (
               <div>
