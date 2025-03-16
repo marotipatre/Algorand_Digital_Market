@@ -9,7 +9,7 @@ import { DigitalMarketClient, DigitalMarketFactory } from './contracts/DigitalMa
 import * as methods from './methods'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 
-interface HomeProps {}
+interface HomeProps { }
 
 const Home: React.FC<HomeProps> = () => {
 
@@ -27,10 +27,15 @@ const Home: React.FC<HomeProps> = () => {
   const [changeprice, setChangePrice] = useState<bigint>(0n)
   const [quantity, setQuantity] = useState<bigint>(0n)
   const [unitsleft, setUnitsLeft] = useState<bigint>(0n)
-  const [seller, setSeller] = useState<string >("")
+  const [seller, setSeller] = useState<string>("")
   const [assetname, setassetname] = useState<string>("")
-  const[int_quantity, setInt_quanity] = useState<bigint>(0n)
+  const [int_quantity, setInt_quanity] = useState<bigint>(0n)
+  const [int_decimals, setInt_decimals] = useState<number>(0)
   const [hasAsset, sethasAsset] = useState<boolean>(false);
+  const [isfractional, setIsFractional] = useState<boolean>(false);
+  const [isNFT, setIsNFT] = useState<boolean>(false);
+  const [assetUrl, setAssetUrl] = useState("");
+
 
   const toggleWalletModal = () => {
     setOpenWalletModal(!openWalletModal)
@@ -151,28 +156,28 @@ const Home: React.FC<HomeProps> = () => {
               onChange={(e) => setAppId(BigInt(e.target.value))}
               className="input input-bordered"
             />
-             {appId === BigInt(0) && (
-            <div>
+            {appId === BigInt(0) && (
+              <div>
 
-            <div className='divider'/>
-            <label className="label flex items-center">
-            <span className="ml-2">Do you have Asset?</span>
-            <input
-                type="checkbox"
-                className="checkbox checkbox-primary"
-                onChange={(e)=>{
-                  sethasAsset(e.currentTarget.checked)
-                }}
+                <div className='divider' />
+                <label className="label flex items-center">
+                  <span className="ml-2">Do you have Asset?</span>
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary"
+                    onChange={(e) => {
+                      sethasAsset(e.currentTarget.checked)
+                    }}
                   />
-            </label>
-            </div>
-                )}
+                </label>
+              </div>
+            )}
 
             <div className="divider" />
             {hasAsset && activeAddress && appId === BigInt(0) && (
-                <div>
-                    <label className="label">Asset ID</label>
-                    <input
+              <div>
+                <label className="label">Asset ID</label>
+                <input
                   type="number"
                   className="input input-bordered"
                   value={(assetId).toString()}
@@ -189,9 +194,9 @@ const Home: React.FC<HomeProps> = () => {
                     setInt_quanity(BigInt(e.currentTarget.valueAsNumber || 0))
                   }}
                 />
-                </div>
+              </div>
             )}
-            { !hasAsset && activeAddress && appId === BigInt(0) && (
+            {!hasAsset && activeAddress && appId === BigInt(0) && (
               <div>
                 <label className="label">Unitary Price</label>
                 <input
@@ -204,12 +209,12 @@ const Home: React.FC<HomeProps> = () => {
                 />
                 <label className="label">Asset Name</label>
                 <input
-                type = "text"
-                className='input input-bordered'
-                value={assetname?.toString()}
-                onChange={(e) => {
-                  setassetname(e.currentTarget.value || "")
-                }} />
+                  type="text"
+                  className='input input-bordered'
+                  value={assetname?.toString()}
+                  onChange={(e) => {
+                    setassetname(e.currentTarget.value || "")
+                  }} />
                 <label className="label">Asset Quantity</label>
                 <input
                   type="number"
@@ -219,10 +224,60 @@ const Home: React.FC<HomeProps> = () => {
                     setInt_quanity(BigInt(e.currentTarget.valueAsNumber || 0))
                   }}
                 />
-                </div>
+
+                <div className='divider' />
+                <label className="label flex items-center">
+                  <span className="ml-2">Make Asset franctional? </span>
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary"
+                    onChange={(e) => {
+                      setIsFractional(e.currentTarget.checked)
+                    }}
+                  />
+                </label>
+                {isfractional && (
+                  <div>
+                    <label className="label">Decimals</label>
+                    <input
+                      type="number"
+                      className="input input-bordered"
+                      value={(int_decimals).toString()}
+                      onChange={(e) => {
+                        setInt_decimals(Number(e.currentTarget.valueAsNumber || 0))
+                      }}
+
+                    />
+                  </div>
                 )}
-                {appId === BigInt(0) && (
-                <div className=''>
+                <div className='divider' />
+                <label className="label flex items-center">
+                  <span className="ml-2">Want to Make NFT?</span>
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary"
+                    onChange={(e) => {
+                      setIsNFT(e.currentTarget.checked)
+                    }}
+                  />
+                </label>
+                {isNFT && (
+                  <div>
+                    <label className="label">ADD IPFS CID OR DIRECT URL</label>
+                    <input
+                      type="text"
+                      className="input input-bordered"
+                      value={assetUrl}
+                      onChange={(e) => {
+                        setAssetUrl(e.currentTarget.value || "");
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {appId === BigInt(0) && (
+              <div className=''>
                 <MethodCall
                   methodFunction={methods.create(
                     algorand,
@@ -232,15 +287,18 @@ const Home: React.FC<HomeProps> = () => {
                     unitaryPrice,
                     activeAddress!,
                     int_quantity,
+                    int_decimals,
                     TransactionSigner,
                     assetname,
-                    "https://ipfs.io/ipfs/bafybeihgaevhc5ryia7ooz4uln4hzvd6ob5a5t7lynpohueqdeer274l3m#arc3",
+                    assetUrl.startsWith("http") 
+                  ? assetUrl // Use the direct URL as-is
+                  : `https://ipfs.io/ipfs/${assetUrl}#arc3`, // Construct IPFS URL from CID
                     setAppId,
                   )}
                   text="Create Application"
                 />
-                </div>
-                )}
+              </div>
+            )}
 
 
 
@@ -253,71 +311,71 @@ const Home: React.FC<HomeProps> = () => {
                 <input type="text" className="input input-bordered" value={assetId.toString()} readOnly />
                 <label className="label">Asset Name</label>
                 <input
-                type = "text"
-                className='input input-bordered'
-                value={assetname?.toString()}
-                readOnly />
+                  type="text"
+                  className='input input-bordered'
+                  value={assetname?.toString()}
+                  readOnly />
                 <label className="label">Units Left</label>
                 <input type="text" className="input input-bordered" value={unitsleft.toString()} readOnly />
 
               </div>
             )}
 
-            {appId!== BigInt(0) && activeAddress === seller && unitsleft > 0n && (
+            {appId !== BigInt(0) && activeAddress === seller && unitsleft > 0n && (
               <div>
                 <div className="divider" />
                 <label className='label'>Change Asset Prize</label>
                 <input type="number" className='input input-bordered' value={(changeprice / BigInt(10e5)).toString()} onChange={(e) => setChangePrice(BigInt(e.currentTarget.valueAsNumber || 0) * BigInt(10e5))} />
                 <MethodCall
                   text='Set Price'
-                  methodFunction={methods.setprice(algorand, dmFactory, dmClient, activeAddress!, changeprice, TransactionSigner,setUnitaryPrice)}/>
+                  methodFunction={methods.setprice(algorand, dmFactory, dmClient, activeAddress!, changeprice, TransactionSigner, setUnitaryPrice)} />
 
               </div>
 
-              )}
+            )}
 
 
-              {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
-                <div>
-                  <div className="divider" />
-                  <label className="label">Price Per Unit</label>
-                  <input
-                    type="text"
-                    className="input input-bordered"
-                    value={(unitaryPrice / BigInt(10e5)).toString()}
-                    readOnly
-                  />
-                  <label className="label">Desired Quantity</label>
-                  <input
-                    type="number"
-                    className="input input-bordered"
-                    value={quantity.toString()}
-                    min="1"
-                    max="1"
-                    onChange={(e) => {
-                      const inputValue = e.currentTarget.valueAsNumber || 0;
-                      // Ensure the quantity is always 1
-                      setQuantity(inputValue > 1 ? BigInt(1) : BigInt(inputValue));
-                    }}
-                  />
-                  <MethodCall
-                    text={`Buy ${quantity} for ${(unitaryPrice * BigInt(quantity)) / BigInt(10e5)} AlGO`}
-                    methodFunction={methods.buy(
-                      algorand,
-                      dmFactory,
-                      dmClient,
-                      activeAddress!,
-                      algosdk.getApplicationAddress(appId),
-                      assetId,
-                      quantity,
-                      unitaryPrice,
-                      TransactionSigner,
-                      seller,
-                      setUnitsLeft,
-                    )}
-                  />
-                </div>
-              )}
+            {activeAddress! && appId !== BigInt(0) && unitsleft > 0n && (
+              <div>
+                <div className="divider" />
+                <label className="label">Price Per Unit</label>
+                <input
+                  type="text"
+                  className="input input-bordered"
+                  value={(unitaryPrice / BigInt(10e5)).toString()}
+                  readOnly
+                />
+                <label className="label">Desired Quantity</label>
+                <input
+                  type="number"
+                  className="input input-bordered"
+                  value={quantity.toString()}
+                  min="1"
+                  max="1"
+                  onChange={(e) => {
+                    const inputValue = e.currentTarget.valueAsNumber || 0;
+                    // Ensure the quantity is always 1
+                    setQuantity(inputValue > 1 ? BigInt(1) : BigInt(inputValue));
+                  }}
+                />
+                <MethodCall
+                  text={`Buy ${quantity} for ${(unitaryPrice * BigInt(quantity)) / BigInt(10e5)} AlGO`}
+                  methodFunction={methods.buy(
+                    algorand,
+                    dmFactory,
+                    dmClient,
+                    activeAddress!,
+                    algosdk.getApplicationAddress(appId),
+                    assetId,
+                    quantity,
+                    unitaryPrice,
+                    TransactionSigner,
+                    seller,
+                    setUnitsLeft,
+                  )}
+                />
+              </div>
+            )}
 
             {appId !== BigInt(0) && assetId !== BigInt(0) && unitsleft <= 0n && activeAddress !== seller && (
               <div>

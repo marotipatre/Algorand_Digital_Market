@@ -4,7 +4,7 @@ import { TransactionSigner } from 'algosdk';
 
 
 //using appfactory client from client file
-export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , signer: TransactionSigner,assetname: string, url: string,
+export function create(algorand: algokit.AlgorandClient, dmFactory: DigitalMarketFactory , dmClient: DigitalMarketClient, assetBeingSold: bigint, unitaryPrice: bigint, sender: string, quantity: bigint , dec:number, signer: TransactionSigner,assetname: string, url: string,
 setAppId: (id: bigint) => void,
 ) {
 
@@ -17,6 +17,7 @@ setAppId: (id: bigint) => void,
     const assetCreate = await algorand.send.assetCreate({
       sender,
       total: quantity,
+      decimals: dec,
       assetName: assetname,
       unitName: assetname.substring(0, 3),
       url: url,

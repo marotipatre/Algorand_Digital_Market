@@ -9,6 +9,12 @@
     },
     {
       "path": "projects/frontend"
+    },
+    {
+      "path": "projects/demoe"
+    },
+    {
+      "path": "projects/demo"
     }
   ],
   "settings": {

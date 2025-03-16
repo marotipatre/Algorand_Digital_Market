@@ -74,3 +74,4 @@ class DigitalMarket(ARC4Contract):
             close_remainder_to=Global.creator_address,
             fee=1_000,
         ).submit()
+
