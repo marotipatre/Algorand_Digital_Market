@@ -234,7 +234,7 @@ const Home: React.FC<HomeProps> = () => {
                     int_quantity,
                     TransactionSigner,
                     assetname,
-                    "https://res.cloudinary.com/dmebegin1/image/upload/v1740774947/algo_cap_uaavnd.png#arc69",
+                    "https://ipfs.io/ipfs/bafybeihgaevhc5ryia7ooz4uln4hzvd6ob5a5t7lynpohueqdeer274l3m#arc3",
                     setAppId,
                   )}
                   text="Create Application"
