@@ -20,3 +20,5 @@ To get started execute:
 2. `algokit init` - invoke this command inside a github codespace to launch an interactive wizard to guide you through the process of creating a new AlgoKit project
 
 Powered by [Copier templates](https://copier.readthedocs.io/en/stable/).
+
+Next Target is update and deveelop Typescript Code
